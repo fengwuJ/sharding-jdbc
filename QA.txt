@@ -1,0 +1,8 @@
+Demo遇到以下问题：
+1、actual-data-nodes: ds.table_user_info_$->{["p1","p2"]} 是使用枚举，字符串需要用引号，$->{1..2}是表示使用范围
+2、sharding-column: position 指定为分片键，algorithm-expression: table_user_info_$->{position}支持直接配字段
+3、key-generator指定分片数据主键，分片insert时，通过检测该主键字段在配置文件中进行配置并且在sql中不存在，则进行appendKeyGenerator重写，重写时使用type指定的算法
+4、key-generator.type: 默认SNOWFLAKE或者UUID，如果需要自定义，需要实现ShardingKeyGenerator，见MyKeyGenerator，并且在resources下新建META-INF/services/org.apache.shardingsphere.spi.keygen.ShardingKeyGenerator文件，文件内容为自定义MyKeyGenerator全路径，yaml配置为getType返回值
+5、PS:::如果insert时sql中自带有主键，则不会使用到sharding-jdbc生成策略，而会使用orm框架定义的生成策略
+6、配置逻辑表和真实表后，逻辑表的相关sql都会被拦截，转化为真实表进行处理，包括建表语句（不用为每一个真实表进行建表）
+7、如果逻辑表已存在的情况下需要分表，则需要将逻辑表建表语句重新执行一遍
